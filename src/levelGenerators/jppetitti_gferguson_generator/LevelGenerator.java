@@ -2,6 +2,7 @@ package levelGenerators.jppetitti_gferguson_generator;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -10,60 +11,88 @@ import engine.core.MarioLevelModel;
 import engine.core.MarioTimer;
 
 
-public class MarkovChainGenerator implements MarioLevelGenerator {
+public class LevelGenerator implements MarioLevelGenerator {
     private List<Slice> slices;
-    private int sliceIndex;
     private List<Integer> starts; // indexes of all slices with mario starts
     private List<Integer> ends; // list of slices with a flag
 
-    public MarkovChainGenerator() {
-    	sliceIndex = 0;
-    	// Get all filenames in the levels directory
-    	for (final File fileEntry : new File("./levels").listFiles()) {
+    public LevelGenerator() {
+    	slices = new ArrayList<Slice>();
+    	starts = new ArrayList<Integer>();
+    	ends = new ArrayList<Integer>();
+    	// Get all filenames in the lePath directory}
+    	for (final File fileEntry : new File("src/levelGenerators/jppetitti_gferguson_generator/levels").listFiles()) {
     		if (!fileEntry.isDirectory()) {
-    			parseIn(fileEntry.getName());
+    			parseIn(fileEntry.getAbsolutePath());
     		}
     	}
     }
 
     public void parseIn(String filename) {
     	FileReader fr;
+    	List<char[]> cols = new ArrayList<char[]>();
     	try {
     		fr = new FileReader(filename);
 			int i; // the character read by fr
-			int columns = 0; // total number of columns
 			int column = 0; // the column number being read
 			int row = 0; // the row number being read
 			boolean firstLine = true;
+			// read through the file and separate out each column into arrays of characters
 			while ((i = fr.read()) != -1) {
 				if ((char) i == '\n') {
 					if (firstLine) {
 						firstLine = false;
-						columns = column; // remember number of columns
 					}
 					row++;
 					column = 0;
 				} else {
 	    			if (firstLine) {
-	    				slices.add(new Slice());
+	    				cols.add(new char[16]);
 	    			}
-					if ((char) i == 'F') {
-						slices.get(sliceIndex + column).setFlag(true);
-						ends.add(sliceIndex + column); // remember that this is an ending slice
-					} else if ((char) i == 'M') {
-						slices.get(sliceIndex + column).setMario(true);
-						starts.add(sliceIndex + column); // remember that this is a starting slice
-					}
-					slices.get(sliceIndex + column).addInChar((char) i, row);
+					cols.get(column)[row] = (char) i;
+					column++;
 				}
 			}
 			fr.close();
-			// add to the sliceIndex for each slice we just added
-			sliceIndex += columns;
 			
     	} catch (Exception e) {
-    		System.err.println("File " + filename + " not found");
+    		System.err.println(e.toString());
+    		System.err.println("Error with file " + filename);
     		return;
+    	}
+    	
+    	// convert char arrays into slices
+    	Slice lastSlice = null;
+    	for (char[] c : cols) {
+    		// see if we've seen this exact sequence of characters before
+			Slice tempSlice = null;
+    		for (Slice s : slices) {
+    			if (s.toString().equals(String.valueOf(c))) {
+    				tempSlice = s;
+    				break;
+    			}
+    		}
+    		if (tempSlice == null) {
+    			// this is a new slice
+				tempSlice = new Slice();
+				for (int i = 0; i < 16; ++i) {
+					if ((char) c[i] == 'M') {
+						tempSlice.setMario(true);
+						starts.add(slices.size());
+					}
+					if ((char) c[i] == 'F') {
+						tempSlice.setFlag(true);
+						ends.add(slices.size());
+					}
+					tempSlice.addInChar(c[i], i);
+				}
+				slices.add(tempSlice);
+    		}
+			// add this as a followup to the last slice we saw
+			if (lastSlice != null) {
+				lastSlice.addFollow(tempSlice);
+			}
+			lastSlice = tempSlice;
     	}
     }
     
@@ -77,6 +106,7 @@ public class MarkovChainGenerator implements MarioLevelGenerator {
     	
     	// pick a starting slice that has a Mario start block
     	Slice curSlice = slices.get(starts.get(rng.nextInt(starts.size())));
+		System.out.println(curSlice.toString());
     	for (int i = 0; i < 16; ++i) {
     		model.setBlock(0, i, curSlice.getPiece(i));
     	}
@@ -84,7 +114,11 @@ public class MarkovChainGenerator implements MarioLevelGenerator {
     	int x = 1;
     	boolean alreadyFlag = false;
     	while (x < model.getWidth() - 1) {
-    		curSlice = curSlice.getNext(rng);
+    		do {
+    			curSlice = curSlice.getNext(rng);
+        		System.out.println(curSlice.toString());
+    		} while (curSlice.getTotalFollow() < 1);
+    		System.out.println(curSlice.toString());
     		for (int i = 0; i < 16; ++i) {
     			model.setBlock(0,  i, curSlice.getPiece(i));
     		}

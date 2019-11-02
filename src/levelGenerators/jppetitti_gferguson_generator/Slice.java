@@ -17,6 +17,10 @@ public class Slice {
         followTimes = new HashMap<Slice, Integer>();
     }
 
+    public String toString() {
+    	return String.valueOf(pieces);
+    }
+    
     public void addInChar(char a, int space){
         pieces[space] = a;
     }
@@ -39,6 +43,10 @@ public class Slice {
 
     public char getPiece(int num){
         return(pieces[num]);
+    }
+    
+    public int getTotalFollow() {
+    	return totalFollow;
     }
 
     public void addFollow(Slice slice){
