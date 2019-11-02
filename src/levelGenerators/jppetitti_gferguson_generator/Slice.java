@@ -8,7 +8,8 @@ public class Slice {
     private int totalFollow;
     private char[] pieces;
     private Map<Slice, Integer> followTimes;
-    private boolean isFlag;
+    private boolean isFlag;  // whether this slice contains a flag character
+    private boolean isMario; // whether this slice contains a Mario start character
 
     public Slice(){
         pieces = new char[16];
@@ -27,6 +28,14 @@ public class Slice {
     public boolean getFlag() {
     	return this.isFlag;
     }
+    
+    public void setMario(boolean isMario) {
+    	this.isMario = isMario;
+    }
+    
+    public boolean getMario() {
+    	return this.isMario;
+    }
 
     public char getPiece(int num){
         return(pieces[num]);
@@ -43,9 +52,8 @@ public class Slice {
         totalFollow++;
     }
 
-    public Slice getNext(){
-        Random random = new Random();
-        int nextRand = random.nextInt(totalFollow);
+    public Slice getNext(Random rng){
+        int nextRand = rng.nextInt(totalFollow);
         int tempTotal = 0;
         for(Map.Entry<Slice, Integer> b : followTimes.entrySet()){
             tempTotal += b.getValue();
