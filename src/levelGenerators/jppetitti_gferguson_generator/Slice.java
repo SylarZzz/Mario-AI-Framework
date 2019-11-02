@@ -6,18 +6,26 @@ import java.util.Random;
 
 public class Slice {
     private int totalFollow;
-    public char[] pieces;
-    public Map<Slice, Integer> followTimes;
-    public boolean isFlag;
+    private char[] pieces;
+    private Map<Slice, Integer> followTimes;
+    private boolean isFlag;
 
     public Slice(){
         pieces = new char[16];
         totalFollow = 0;
-        followTimes = new HashMap();
+        followTimes = new HashMap<Slice, Integer>();
     }
 
     public void addInChar(char a, int space){
         pieces[space] = a;
+    }
+    
+    public void setFlag(boolean isFlag) {
+    	this.isFlag = isFlag;
+    }
+    
+    public boolean getFlag() {
+    	return this.isFlag;
     }
 
     public char getPiece(int num){
