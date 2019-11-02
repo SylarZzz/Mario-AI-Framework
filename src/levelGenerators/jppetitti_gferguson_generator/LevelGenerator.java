@@ -29,6 +29,7 @@ public class LevelGenerator implements MarioLevelGenerator {
     }
 
     public void parseIn(String filename) {
+    	System.out.println("Reading " + filename);
     	FileReader fr;
     	List<char[]> cols = new ArrayList<char[]>();
     	try {
@@ -98,7 +99,7 @@ public class LevelGenerator implements MarioLevelGenerator {
     
     @Override
     public String getGeneratedLevel(MarioLevelModel model, MarioTimer timer) {
-    	// intialize new random number generator
+    	// initialize new random number generator
     	Random rng = new Random();
     	
     	// start with a clear model
@@ -106,7 +107,6 @@ public class LevelGenerator implements MarioLevelGenerator {
     	
     	// pick a starting slice that has a Mario start block
     	Slice curSlice = slices.get(starts.get(rng.nextInt(starts.size())));
-		System.out.println(curSlice.toString());
     	for (int i = 0; i < 16; ++i) {
     		model.setBlock(0, i, curSlice.getPiece(i));
     	}
@@ -116,16 +116,15 @@ public class LevelGenerator implements MarioLevelGenerator {
     	while (x < model.getWidth() - 1) {
     		do {
     			curSlice = curSlice.getNext(rng);
-        		System.out.println(curSlice.toString());
     		} while (curSlice.getTotalFollow() < 1);
-    		System.out.println(curSlice.toString());
     		for (int i = 0; i < 16; ++i) {
-    			model.setBlock(0,  i, curSlice.getPiece(i));
+    			model.setBlock(x,  i, curSlice.getPiece(i));
     		}
     		if (curSlice.getFlag()) {
     			alreadyFlag = true;
     			break;
     		}
+    		x++;
     	}
     	
     	// if we haven't already added a flag, put a flag slice at the end
