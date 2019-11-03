@@ -12,7 +12,7 @@ import engine.core.MarioTimer;
 
 
 public class LevelGenerator implements MarioLevelGenerator {
-	private final String LEVEL_FOLDER = "levels/original/";
+	private final String LEVEL_FOLDER = "levels/ore/";
 	// list of all slices this level generator knows of
     private List<Slice> slices;
     // indexes of all slices with a Mario start tile
@@ -123,8 +123,14 @@ public class LevelGenerator implements MarioLevelGenerator {
     	// start with a clear model
     	model.clearMap();
     	
-    	// pick a starting slice that has a Mario start block
-    	Slice curSlice = slices.get(starts.get(rng.nextInt(starts.size())));
+    	// pick a starting slice that has a Mario start block, or just a random
+    	// one if no slices have a Mario start
+    	Slice curSlice;
+    	if (starts.size() > 0) {
+    		curSlice = slices.get(starts.get(rng.nextInt(starts.size())));
+    	} else {
+    		curSlice = slices.get(rng.nextInt(slices.size()));
+    	}
     	for (int i = 0; i < 16; ++i) {
     		model.setBlock(0, i, curSlice.getPiece(i));
     	}
