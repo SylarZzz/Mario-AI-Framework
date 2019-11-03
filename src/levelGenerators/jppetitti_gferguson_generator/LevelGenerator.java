@@ -12,22 +12,34 @@ import engine.core.MarioTimer;
 
 
 public class LevelGenerator implements MarioLevelGenerator {
+	private final String LEVEL_FOLDER = "levels/original/";
+	// list of all slices this level generator knows of
     private List<Slice> slices;
-    private List<Integer> starts; // indexes of all slices with mario starts
-    private List<Integer> ends; // list of slices with a flag
+    // indexes of all slices with a Mario start tile
+    private List<Integer> starts;
+    // list of slices with a flag tile
+    private List<Integer> ends; 
 
+    /**
+     * Basic constructor, reads all level files in LEVEL_FOLDER
+     */
     public LevelGenerator() {
     	slices = new ArrayList<Slice>();
     	starts = new ArrayList<Integer>();
     	ends = new ArrayList<Integer>();
     	// Get all filenames in the lePath directory}
-    	for (final File fileEntry : new File("src/levelGenerators/jppetitti_gferguson_generator/levels").listFiles()) {
+    	for (final File fileEntry : new File(LEVEL_FOLDER).listFiles()) {
     		if (!fileEntry.isDirectory()) {
     			parseIn(fileEntry.getAbsolutePath());
     		}
     	}
     }
 
+    /**
+     * Reads in a level file from the filesystem, splitting it into 1-column
+     * wide slices and adding them to a Markov transition table
+     * @param filename the path to the file to read in
+     */
     public void parseIn(String filename) {
     	System.out.println("Reading " + filename);
     	FileReader fr;
@@ -97,6 +109,12 @@ public class LevelGenerator implements MarioLevelGenerator {
     	}
     }
     
+    /**
+     * Generates a level
+     * @param model a MarioLevelModel object
+     * @parm timer a MarioTimer object
+     * @return the string version of a Markov-generated level
+     */
     @Override
     public String getGeneratedLevel(MarioLevelModel model, MarioTimer timer) {
     	// initialize new random number generator
@@ -113,10 +131,12 @@ public class LevelGenerator implements MarioLevelGenerator {
     	
     	int x = 1;
     	boolean alreadyFlag = false;
+    	int prevHeight = curSlice.getGroundHeight();
     	while (x < model.getWidth() - 1) {
     		do {
     			curSlice = curSlice.getNext(rng);
-    		} while (curSlice.getTotalFollow() < 1);
+    			// make sure that the next slice has followups and isn't too high to jump to from here
+    		} while (curSlice.getTotalFollow() < 1 && curSlice.getGroundHeight() < prevHeight + 4);
     		for (int i = 0; i < 16; ++i) {
     			model.setBlock(x,  i, curSlice.getPiece(i));
     		}
@@ -139,6 +159,10 @@ public class LevelGenerator implements MarioLevelGenerator {
     	return model.getMap();
     }
     
+    /**
+     * gets the name of this level generator
+     * @return the name of this generator
+     */
     @Override
     public String getGeneratorName() {
     	return "MarkovChainGenerator";
