@@ -37,6 +37,15 @@
       </list>
     </option>
   </component>
+  <component name="RunManager">
+    <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="GenerateLevel" />
+      <module name="Mario-AI-Framework" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -48,6 +57,7 @@
       <option name="presentableId" value="Default" />
       <updated>1572725527081</updated>
       <workItem from="1572725528586" duration="2210000" />
+      <workItem from="1575407026305" duration="2769000" />
     </task>
     <servers />
   </component>
@@ -59,7 +69,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
