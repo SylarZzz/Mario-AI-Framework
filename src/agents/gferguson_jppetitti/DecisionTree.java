@@ -59,6 +59,10 @@ class EnemyNearbyNode extends QuestionNode {
 	}
 }
 
+/*
+ * Executes the yes branch if less than one second has elapsed in the level,
+ * otherwise executes the no branch
+ */
 class LevelJustStartedNode extends QuestionNode {
 	private MarioForwardModel model;
 
