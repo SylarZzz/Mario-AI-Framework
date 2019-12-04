@@ -1,7 +1,5 @@
 package agents.gferguson_jppetitti;
 
-import java.util.ArrayList;
-
 import agents.robinBaumgarten.AStarTree;
 import agents.robinBaumgarten.Helper;
 import engine.core.MarioForwardModel;
@@ -33,15 +31,12 @@ public class DecisionTree {
  * Executes the yes branch if there is an enemy within sight of Mario, otherwise
  * executes the no branch
  */
-class EnemyNearbyNode extends QuestionNode {
+class EnemyNearbyNode extends BinaryQuestionNode {
 	private MarioForwardModel model;
 
 	public EnemyNearbyNode(MarioForwardModel model, INode yesBranch, INode noBranch) {
+		super(yesBranch, noBranch);
 		this.model = model;
-		ArrayList<INode> branches = new ArrayList<INode>();
-		branches.add(yesBranch);
-		branches.add(noBranch);
-		setBranches(branches);
 	}
 	
 	@Override
@@ -51,11 +46,12 @@ class EnemyNearbyNode extends QuestionNode {
 		    for (int y = 0; y < obs[x].length; ++y) {
 		    	if (obs[x][y] != MarioForwardModel.OBS_NONE) {
 					// enemy spotted
-					return this.getBranch(0).execute(); // yesBranch
+					return this.executeYesBranch();
 				}
 			}
 		}
-		return this.getBranch(1).execute(); // noBranch
+		// no enemy spotted
+		return this.executeNoBranch();
 	}
 }
 
@@ -63,23 +59,20 @@ class EnemyNearbyNode extends QuestionNode {
  * Executes the yes branch if less than one second has elapsed in the level,
  * otherwise executes the no branch
  */
-class LevelJustStartedNode extends QuestionNode {
+class LevelJustStartedNode extends BinaryQuestionNode {
 	private MarioForwardModel model;
 
 	public LevelJustStartedNode(MarioForwardModel model, INode yesBranch, INode noBranch) {
+		super(yesBranch, noBranch);
 		this.model = model;
-		ArrayList<INode> branches = new ArrayList<INode>();
-		branches.add(yesBranch);
-		branches.add(noBranch);
-		setBranches(branches);
 	}
 
 	@Override
 	public boolean[] execute() {
 		if (this.model.getRemainingTime() >= 19000) {
-			return this.getBranch(0).execute(); // yesBranch
+			return this.executeYesBranch();
 		} else {
-			return this.getBranch(1).execute(); // noBranch
+			return this.executeNoBranch();
 		}
 	}
 }
@@ -100,7 +93,6 @@ class GoForwardNode extends ActionNode {
 	
 	@Override
 	public boolean[] execute() {
-		System.out.println("GoForwardNode: executing");
 		return this.aStarTree.optimise(model, timer);
 	}
 }
@@ -113,7 +105,6 @@ class DoNothingNode extends ActionNode {
 	
 	@Override
 	public boolean[] execute() {
-		System.out.println("DoNothingNode: executing");
 		return Helper.createAction(false, false, false, false, false);
 	}
 }
