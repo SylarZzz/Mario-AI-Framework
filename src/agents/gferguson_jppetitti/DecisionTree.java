@@ -47,17 +47,13 @@ class EnemyNearbyNode extends QuestionNode {
 	public boolean[] execute() {
 		int[][] obs = model.getMarioEnemiesObservation();
 		for (int x = 0; x < obs.length; ++x) {
-			System.out.print("\n");
 		    for (int y = 0; y < obs[x].length; ++y) {
-	    		System.out.print(obs[x][y]);
 		    	if (obs[x][y] != MarioForwardModel.OBS_NONE) {
 					// enemy spotted
-					System.out.println("EnemyNearbyNode: enemy spotted");
 					return this.getBranch(0).execute(); // yesBranch
 				}
 			}
 		}
-		System.out.println("EnemyNearbyNode: no enemy spotted");
 		return this.getBranch(1).execute(); // noBranch
 	}
 }
