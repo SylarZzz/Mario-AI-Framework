@@ -16,7 +16,8 @@ public class DecisionTree {
 		INode dnn = new DoNothingNode();
 		INode gfn = new GoForwardNode(aStarTree, model, timer);
 		INode enn = new EnemyNearbyNode(model, dnn, gfn);
-		return enn.execute();
+		INode ljsn = new LevelJustStartedNode(model, dnn, enn);
+		return ljsn.execute();
 	}
 }
 
@@ -55,6 +56,27 @@ class EnemyNearbyNode extends QuestionNode {
 			}
 		}
 		return this.getBranch(1).execute(); // noBranch
+	}
+}
+
+class LevelJustStartedNode extends QuestionNode {
+	private MarioForwardModel model;
+
+	public LevelJustStartedNode(MarioForwardModel model, INode yesBranch, INode noBranch) {
+		this.model = model;
+		ArrayList<INode> branches = new ArrayList<INode>();
+		branches.add(yesBranch);
+		branches.add(noBranch);
+		setBranches(branches);
+	}
+
+	@Override
+	public boolean[] execute() {
+		if (this.model.getRemainingTime() >= 19000) {
+			return this.getBranch(0).execute(); // yesBranch
+		} else {
+			return this.getBranch(1).execute(); // noBranch
+		}
 	}
 }
 
