@@ -1,11 +1,18 @@
 package agents.gferguson_jppetitti;
 
-public class ActionNode {
-    public int action;
-    public String nameAction;
+import agents.robinBaumgarten.Helper;
 
-    public ActionNode(String name, int act){
-        action = act;
-        nameAction = name;
-    }
+/*
+ * Each individual leaf node should override execute() with something that returns an appropriate action
+ */
+public class ActionNode implements INode {
+
+	public ActionNode() { }
+	
+	@Override
+	public boolean[] execute() {
+		// This generic action just returns an empty action
+		return Helper.createAction(false, false, false, false, false);
+	}
+
 }

@@ -1,37 +1,116 @@
 package agents.gferguson_jppetitti;
 
-import sun.reflect.generics.tree.Tree;
+import java.util.ArrayList;
 
-import javax.swing.*;
+import agents.robinBaumgarten.AStarTree;
+import agents.robinBaumgarten.Helper;
+import engine.core.MarioForwardModel;
+import engine.core.MarioTimer;
 
-public class DecisionTree {
-    public TreeNode rootNode;
+public class DecisionTree {	
+	public DecisionTree() {
 
-    public DecisionTree(){
-        rootNode = null;
-        TreeNode root = new TreeNode("base");
-        rootNode = root;
-        ActionNode back = new ActionNode("back", 1);
-        ActionNode move = new ActionNode("move",2);
-        ActionNode jump = new ActionNode("jump", 3);
-        TreeNode isEnemy = new TreeNode("is there an enemy?");
-        TreeNode isWithinX = new TreeNode("is enemy within x?");
-        TreeNode isTurnedTowards = new TreeNode("is enemy turned toward you?");
-        TreeNode checkTurnBack = new TreeNode("how many times turned back?");
-        Edge enemyIs = new Edge(false,"enemyIs around");
-        Edge enemyIsWithin = new Edge(false,"enemy is within range");
-        Edge enemyIsTurnedTowards = new Edge(false,"enemy is turned towards you");
-        Edge backGreater = new Edge(true,"backed greater than 3 times");
-        Edge enemyIsnt = new Edge(true,"enemyIsnt around");
-        Edge enemyIsntWithin = new Edge(true,"enemy isnt within range");
-        Edge enemyIsntTurnedTowards = new Edge(true,"enemy isnt turned towards you");
-        Edge backLEss = new Edge(true,"backed Less than 3 times");
-
-        root.addNode(enemyIs);
-        root.addNode(enemyIsnt)
-    }
-
-    public void addNode(Edge added){
-        rootNode.addNode(added);
-    }
+	}
+	
+	public boolean[] decide(AStarTree aStarTree, MarioForwardModel model, MarioTimer timer) {
+		INode dnn = new DoNothingNode();
+		INode gfn = new GoForwardNode(aStarTree, model, timer);
+		INode enn = new EnemyNearbyNode(model, dnn, gfn);
+		return enn.execute();
+	}
 }
+
+/*
+ * Define each of the custom classes for the various decision and action nodes
+ * here.
+ * 
+ * This is only necessary because Java doesn't have functions as first-class
+ * citizens.
+ */
+
+/*
+ * Executes the yes branch if there is an enemy within sight of Mario, otherwise
+ * executes the no branch
+ */
+class EnemyNearbyNode extends QuestionNode {
+	private MarioForwardModel model;
+
+	public EnemyNearbyNode(MarioForwardModel model, INode yesBranch, INode noBranch) {
+		this.model = model;
+		ArrayList<INode> branches = new ArrayList<INode>();
+		branches.add(yesBranch);
+		branches.add(noBranch);
+		setBranches(branches);
+	}
+	
+	@Override
+	public boolean[] execute() {
+		int[][] obs = model.getMarioEnemiesObservation();
+		for (int x = 0; x < obs.length; ++x) {
+			System.out.print("\n");
+		    for (int y = 0; y < obs[x].length; ++y) {
+	    		System.out.print(obs[x][y]);
+		    	if (obs[x][y] != MarioForwardModel.OBS_NONE) {
+					// enemy spotted
+					System.out.println("EnemyNearbyNode: enemy spotted");
+					return this.getBranch(0).execute(); // yesBranch
+				}
+			}
+		}
+		System.out.println("EnemyNearbyNode: no enemy spotted");
+		return this.getBranch(1).execute(); // noBranch
+	}
+}
+
+/*
+ * Goes forward with the optimal action computed by A-Star
+ */
+class GoForwardNode extends ActionNode {
+	private AStarTree aStarTree;
+	private MarioForwardModel model;
+	private MarioTimer timer;
+	
+	public GoForwardNode(AStarTree aStarTree, MarioForwardModel model, MarioTimer timer) {
+		this.aStarTree = aStarTree;
+		this.model = model;
+		this.timer = timer;
+	}
+	
+	@Override
+	public boolean[] execute() {
+		System.out.println("GoForwardNode: executing");
+		return this.aStarTree.optimise(model, timer);
+	}
+}
+
+/*
+ * Returns an all-false action, doing nothing
+ */
+class DoNothingNode extends ActionNode {
+	public DoNothingNode() { }
+	
+	@Override
+	public boolean[] execute() {
+		System.out.println("DoNothingNode: executing");
+		return Helper.createAction(false, false, false, false, false);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

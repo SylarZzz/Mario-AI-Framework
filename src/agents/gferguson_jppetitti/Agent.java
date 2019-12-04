@@ -6,22 +6,25 @@ import engine.core.MarioTimer;
 import engine.helper.MarioActions;
 import agents.robinBaumgarten.AStarTree;
 
+
 /**
  * @author Grant Ferguson and Joseph Petitti
  */
 public class Agent implements MarioAgent {
     private boolean action[];
-    private AStarTree tree;
+    private AStarTree aStarTree;
+    private DecisionTree decisionTree;
 
 	@Override
 	public void initialize(MarioForwardModel model, MarioTimer timer) {
 		this.action = new boolean[MarioActions.numberOfActions()];
-		this.tree = new AStarTree();
+		this.aStarTree = new AStarTree();
+		this.decisionTree = new DecisionTree();
 	}
 
 	@Override
 	public boolean[] getActions(MarioForwardModel model, MarioTimer timer) {
-		// TODO Auto-generated method stub
+		this.action = this.decisionTree.decide(this.aStarTree, model, timer);
 		return action;
 	}
 
