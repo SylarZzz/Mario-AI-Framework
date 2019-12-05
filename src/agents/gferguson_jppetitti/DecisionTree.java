@@ -5,6 +5,8 @@ import agents.robinBaumgarten.Helper;
 import engine.core.MarioForwardModel;
 import engine.core.MarioTimer;
 
+import java.util.ArrayList;
+
 /**
  * this class contains an entire decision tree, and has a public interface that
  * recursively walks down it to get an action
@@ -182,6 +184,34 @@ class GoForwardNode extends ActionNode {
 	@Override
 	public boolean[] execute() {
 		return this.aStarTree.optimise(model, timer);
+	}
+}
+/*
+*	EnemyClose and Astar over it
+ */
+class EnemyCloseNode extends QuestionNode{
+	private MarioForwardModel model;
+
+	public EnemyCloseNode(MarioForwardModel model, INode yesBranch, INode noBranch) {
+		this.model = model;
+		ArrayList<INode> branches = new ArrayList<INode>();
+		branches.add(yesBranch);
+		branches.add(noBranch);
+		setBranches(branches);
+	}
+
+	@Override
+	public boolean[] execute() {
+		int[][] obs = model.getMarioEnemiesObservation();
+		for (int x = 0; x < obs.length; ++x) {
+			for (int y = 0; y < obs[x].length; ++y) {
+				if (obs[x][y] != MarioForwardModel.OBS_NONE) {
+					// enemy spotted
+					return this.getBranch(0).execute(); // yesBranch
+				}
+			}
+		}
+		return this.getBranch(1).execute(); // noBranch
 	}
 }
 

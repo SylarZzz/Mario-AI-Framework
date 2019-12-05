@@ -37,14 +37,25 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
-    <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
+  <component name="RunManager" selected="Application.PlayLevel">
+    <configuration name="GenerateLvel" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="GenerateLevel" />
       <module name="Mario-AI-Framework" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="PlayLevel" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="PlayLevel" />
+      <module name="Mario-AI-Framework" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.GenerateLvel" />
+      <item itemvalue="Application.PlayLevel" />
+    </list>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -58,6 +69,9 @@
       <updated>1572725527081</updated>
       <workItem from="1572725528586" duration="2210000" />
       <workItem from="1575407026305" duration="5232000" />
+      <workItem from="1575413379490" duration="4825000" />
+      <workItem from="1575494913359" duration="1338000" />
+      <workItem from="1575511504697" duration="5755000" />
     </task>
     <servers />
   </component>
