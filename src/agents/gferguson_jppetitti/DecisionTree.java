@@ -5,16 +5,27 @@ import agents.robinBaumgarten.Helper;
 import engine.core.MarioForwardModel;
 import engine.core.MarioTimer;
 
+/**
+ * this class contains an entire decision tree, and has a public interface that
+ * recursively walks down it to get an action
+ * @author Joseph Petitti
+ */
 public class DecisionTree {	
 	public DecisionTree() {
 
 	}
-	
-	public boolean[] decide(AStarTree aStarTree, MarioForwardModel model, MarioTimer timer) {
+
+	public boolean[] decide(AStarTree aStarTree, MarioForwardModel model,
+			MarioTimer timer) {
 		INode dnn = new DoNothingNode();
+		INode gln = new GoLeftNode();
+		INode jrn = new JumpRightNode();
 		INode gfn = new GoForwardNode(aStarTree, model, timer);
-		INode enn = new EnemyNearbyNode(model, dnn, gfn);
-		INode ljsn = new LevelJustStartedNode(model, dnn, enn);
+		INode ffn = new FiftyFiftyNode(gln, jrn);
+		INode oln = new OnLedgeNode(model, ffn, gfn);
+		INode enn = new EnemyNearbyNode(model, jrn, oln);
+		INode evcn = new EnemyVeryCloseNode(model, gln, enn);
+		INode ljsn = new LevelJustStartedNode(model, dnn, evcn);
 		return ljsn.execute();
 	}
 }
@@ -27,27 +38,45 @@ public class DecisionTree {
  * citizens.
  */
 
-/*
- * Executes the yes branch if there is an enemy within sight of Mario, otherwise
- * executes the no branch
+/**
+ * 50% chance of executing yesBranch, 50% chance of executing noBranch
+ * @author Joseph Petitti
+ */
+class FiftyFiftyNode extends BinaryQuestionNode {
+	public FiftyFiftyNode(INode yesBranch, INode noBranch) {
+		super(yesBranch, noBranch);
+	}
+
+	public boolean[] execute() {
+		if (Math.random() < .5) {
+			return this.executeYesBranch();
+		} else {
+			return this.executeNoBranch();
+		}
+	}
+}
+
+/**
+ * Executes the yes branch if there is an enemy within 8 blocks of Mario on the
+ * same Y level, otherwise executes the no branch
+ * @author Joseph Petitti
  */
 class EnemyNearbyNode extends BinaryQuestionNode {
 	private MarioForwardModel model;
 
-	public EnemyNearbyNode(MarioForwardModel model, INode yesBranch, INode noBranch) {
+	public EnemyNearbyNode(MarioForwardModel model, INode yesBranch,
+			INode noBranch) {
 		super(yesBranch, noBranch);
 		this.model = model;
 	}
-	
+
 	@Override
 	public boolean[] execute() {
 		int[][] obs = model.getMarioEnemiesObservation();
 		for (int x = 0; x < obs.length; ++x) {
-		    for (int y = 0; y < obs[x].length; ++y) {
-		    	if (obs[x][y] != MarioForwardModel.OBS_NONE) {
-					// enemy spotted
-					return this.executeYesBranch();
-				}
+			if (obs[x][obs[x].length / 2] != MarioForwardModel.OBS_NONE) {
+				// enemy spotted
+				return this.executeYesBranch();
 			}
 		}
 		// no enemy spotted
@@ -55,14 +84,71 @@ class EnemyNearbyNode extends BinaryQuestionNode {
 	}
 }
 
-/*
+/**
+ * Executes the yes branch if Mario is standing on a ledge, otherwise executes
+ * the no branch
+ * @author Joseph Petitti
+ */
+class OnLedgeNode extends BinaryQuestionNode {
+	private MarioForwardModel model;
+
+	public OnLedgeNode(MarioForwardModel model, INode yesBranch,
+			INode noBranch) {
+		super(yesBranch, noBranch);
+		this.model = model;
+	}
+
+	public boolean[] execute() {
+		int[][] obs = model.getMarioSceneObservation();
+		if (model.isMarioOnGround() && 
+				obs[obs.length / 2 + 3][obs.length / 2 + 1] == 
+				MarioForwardModel.OBS_NONE) {
+			return this.executeYesBranch();
+		} else {
+			return this.executeNoBranch();
+		}
+	}
+}
+
+/**
+ * Executes the yes branch if there is an enemy within 3 blocks in front of
+ * Mario, otherwise executes the no branch
+ * @author Joseph Petitti
+ */
+class EnemyVeryCloseNode extends BinaryQuestionNode {
+	private MarioForwardModel model;
+
+	public EnemyVeryCloseNode(MarioForwardModel model, INode yesBranch,
+			INode noBranch) {
+		super(yesBranch, noBranch);
+		this.model = model;
+	}
+
+	public boolean[] execute() {
+		int[][] obs = model.getMarioEnemiesObservation();
+		int smallX = (obs.length / 4) - 1;
+
+		for (int x = obs.length / 2; x < obs.length - smallX; ++x) {
+			if (obs[x][obs[x].length / 2] != MarioForwardModel.OBS_NONE) {
+				// enemy spotted
+				return this.executeYesBranch();
+			}
+		}
+		// no enemy spotted
+		return this.executeNoBranch();
+	}
+}
+
+/**
  * Executes the yes branch if less than one second has elapsed in the level,
  * otherwise executes the no branch
+ * @author Joseph Petitti
  */
 class LevelJustStartedNode extends BinaryQuestionNode {
 	private MarioForwardModel model;
 
-	public LevelJustStartedNode(MarioForwardModel model, INode yesBranch, INode noBranch) {
+	public LevelJustStartedNode(MarioForwardModel model, INode yesBranch,
+			INode noBranch) {
 		super(yesBranch, noBranch);
 		this.model = model;
 	}
@@ -77,53 +163,63 @@ class LevelJustStartedNode extends BinaryQuestionNode {
 	}
 }
 
-/*
+/**
  * Goes forward with the optimal action computed by A-Star
+ * @author Joseph Petitti
  */
 class GoForwardNode extends ActionNode {
 	private AStarTree aStarTree;
 	private MarioForwardModel model;
 	private MarioTimer timer;
-	
-	public GoForwardNode(AStarTree aStarTree, MarioForwardModel model, MarioTimer timer) {
+
+	public GoForwardNode(AStarTree aStarTree, MarioForwardModel model,
+			MarioTimer timer) {
 		this.aStarTree = aStarTree;
 		this.model = model;
 		this.timer = timer;
 	}
-	
+
 	@Override
 	public boolean[] execute() {
 		return this.aStarTree.optimise(model, timer);
 	}
 }
 
-/*
+/**
  * Returns an all-false action, doing nothing
+ * @author Joseph Petitti
  */
 class DoNothingNode extends ActionNode {
 	public DoNothingNode() { }
-	
+
 	@Override
 	public boolean[] execute() {
 		return Helper.createAction(false, false, false, false, false);
 	}
 }
 
+/**
+ * Returns an action walking slowly to the left
+ * @author Joseph Petitti
+ */
+class GoLeftNode extends ActionNode {
+	public GoLeftNode() { }
 
+	@Override
+	public boolean[] execute() {
+		return Helper.createAction(true, false, false, false, false);
+	}
+}
 
+/*
+ * Returns an action jumping to the right
+ */
+class JumpRightNode extends ActionNode {
+	public JumpRightNode() { }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	@Override
+	public boolean[] execute() {
+		return Helper.createAction(false, true, false, true, false);
+	}
+}
 
