@@ -4,6 +4,7 @@ import agents.robinBaumgarten.AStarTree;
 import agents.robinBaumgarten.Helper;
 import engine.core.MarioForwardModel;
 import engine.core.MarioTimer;
+import engine.helper.MarioActions;
 
 import java.util.ArrayList;
 
@@ -12,10 +13,8 @@ import java.util.ArrayList;
  * recursively walks down it to get an action
  * @author Joseph Petitti
  */
-public class DecisionTree {	
-	public DecisionTree() {
-
-	}
+public class DecisionTree {
+	public DecisionTree() {	}
 
 	public boolean[] decide(AStarTree aStarTree, MarioForwardModel model,
 			MarioTimer timer) {
@@ -25,9 +24,10 @@ public class DecisionTree {
 		INode gfn = new GoForwardNode(aStarTree, model, timer);
 		INode ffn = new FiftyFiftyNode(gln, jrn);
 		INode oln = new OnLedgeNode(model, ffn, gfn);
-		INode enn = new EnemyNearbyNode(model, jrn, oln);
+		INode enn = new EnemyNearbyNode(model, gfn, oln);
 		INode evcn = new EnemyVeryCloseNode(model, gln, enn);
-		INode ljsn = new LevelJustStartedNode(model, dnn, evcn);
+		INode ian = new InAirNode(model, gfn, evcn);
+		INode ljsn = new LevelJustStartedNode(model, dnn, ian);
 		return ljsn.execute();
 	}
 }
@@ -57,6 +57,30 @@ class FiftyFiftyNode extends BinaryQuestionNode {
 		}
 	}
 }
+
+/**
+ * Executes the yes branch if Mario is in the air (not touching the ground),
+ * otherwise executes the no branch
+ * @author Joseph Petitti
+ */
+class InAirNode extends BinaryQuestionNode {
+	private MarioForwardModel model;
+
+	public InAirNode(MarioForwardModel model, INode yesBranch,
+			INode noBranch) {
+		super(yesBranch, noBranch);
+		this.model = model;
+	}
+	
+	public boolean[] execute() {
+		if (model.isMarioOnGround()) {
+			return this.executeNoBranch();
+		} else {
+			return this.executeYesBranch();
+		}
+	}
+}
+
 
 /**
  * Executes the yes branch if there is an enemy within 8 blocks of Mario on the
@@ -128,9 +152,8 @@ class EnemyVeryCloseNode extends BinaryQuestionNode {
 
 	public boolean[] execute() {
 		int[][] obs = model.getMarioEnemiesObservation();
-		int smallX = (obs.length / 4) - 1;
 
-		for (int x = obs.length / 2; x < obs.length - smallX; ++x) {
+		for (int x = obs.length / 2; x < obs.length / 2 + 2; ++x) {
 			if (obs[x][obs[x].length / 2] != MarioForwardModel.OBS_NONE) {
 				// enemy spotted
 				return this.executeYesBranch();
@@ -157,7 +180,7 @@ class LevelJustStartedNode extends BinaryQuestionNode {
 
 	@Override
 	public boolean[] execute() {
-		if (this.model.getRemainingTime() >= 19000) {
+		if (this.model.getRemainingTime() >= 19 * 1000) {
 			return this.executeYesBranch();
 		} else {
 			return this.executeNoBranch();
@@ -183,7 +206,9 @@ class GoForwardNode extends ActionNode {
 
 	@Override
 	public boolean[] execute() {
-		return this.aStarTree.optimise(model, timer);
+		boolean[] aStarAction = this.aStarTree.optimise(model, timer);
+		aStarAction[MarioActions.SPEED.getValue()] = false;
+		return aStarAction;
 	}
 }
 /*
