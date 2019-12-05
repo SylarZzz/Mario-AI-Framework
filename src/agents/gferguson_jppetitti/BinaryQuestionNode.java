@@ -2,8 +2,9 @@ package agents.gferguson_jppetitti;
 
 import java.util.ArrayList;
 
-/*
+/**
  * Represents a question branch with just two nodes
+ * @author Joseph Petitti
  */
 public class BinaryQuestionNode extends QuestionNode {
 	public BinaryQuestionNode(INode yesBranch, INode noBranch) {

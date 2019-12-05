@@ -4,9 +4,10 @@ import java.util.ArrayList;
 
 import agents.robinBaumgarten.Helper;
 
-/*
+/**
  * Each individual question should extend this class and modify execute() to it
  * conditionally return a branch's execute() result
+ * @author Joseph Petitti
  */
 public class QuestionNode implements INode {
 	private ArrayList<INode> branches;
@@ -25,7 +26,7 @@ public class QuestionNode implements INode {
 		return this.branches;
 	}
 	
-	/*
+	/**
 	 * get the branch at the given index in branches
 	 */
 	public INode getBranch(int index) {

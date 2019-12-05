@@ -11,9 +11,9 @@ import agents.robinBaumgarten.AStarTree;
  * @author Grant Ferguson and Joseph Petitti
  */
 public class Agent implements MarioAgent {
-    private boolean action[];
-    private AStarTree aStarTree;
-    private DecisionTree decisionTree;
+	boolean action[];
+	AStarTree aStarTree;
+	DecisionTree decisionTree;
 
 	@Override
 	public void initialize(MarioForwardModel model, MarioTimer timer) {
