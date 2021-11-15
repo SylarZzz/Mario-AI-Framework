@@ -82,5 +82,8 @@ public class Chunk {
         return n; // returns -1 if there is no blocks in the current chunk.
     }
 
+    public String toString() {
+        return String.valueOf(pixels);
+    }
 
 }
