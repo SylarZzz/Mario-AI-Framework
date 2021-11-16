@@ -2,13 +2,11 @@ package levelGenerators.DaiCaiZhangGenerator;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import engine.core.MarioLevelGenerator;
-import engine.core.MarioLevelModel;
 import engine.core.MarioTimer;
+import engine.core.MarioLevelModel;
 
 public class LevelGenerator implements MarioLevelGenerator{
     private final String LEVEL_FOLDER = "levels/ge/";
@@ -16,43 +14,44 @@ public class LevelGenerator implements MarioLevelGenerator{
     private List<Integer> startChunks;
     private List<Integer> endChunks;
 
+    // read files from levels folder
     public LevelGenerator(){
         chunks = new ArrayList<Chunk>();
         startChunks = new ArrayList<Integer>();
         endChunks = new ArrayList<Integer>();
-        for (final File fileEntry : new File(LEVEL_FOLDER).listFiles()) {
-            if (!fileEntry.isDirectory()) {
-                readLevel(fileEntry.getAbsolutePath());
+        File[] f =  new File(LEVEL_FOLDER).listFiles();
+        for(int i = 0; i < f.length; i++) {
+            if(!f[i].isDirectory()) {
+                readLevel(f[i].getAbsolutePath());
             }
         }
     }
 
     private void readLevel(String filename){
-        System.out.print("Reading File: " + filename);
         FileReader filereader;
         List<char[]> columns = new ArrayList<char[]>();
         try {
             filereader = new FileReader(filename);
 
             int i;                        // the character read by filereader
-            int columnnumber = 0;         // the number of column being read
-            int rownumber = 0;            // the number of row being read
+            int colnum = 0;         // the number of column being read
+            int rownum = 0;            // the number of row being read
             boolean isFirstLine = true;
 
             while ((i = filereader.read()) != -1){
-                if ((char) i == '\n'){
+                if ((char) i == '\n'){ 
                     if (isFirstLine){
                         isFirstLine = false;
                     }
-                    rownumber++;
-                    columnnumber = 0;
+                    rownum++;
+                    colnum = 0;
                 }
                 else{
                     if (isFirstLine){
                         columns.add(new char[16]);
                     }
-                    columns.get(columnnumber)[rownumber] = (char) i;
-                    columnnumber ++;
+                    columns.get(colnum)[rownum] = (char) i;
+                    colnum++;
                 }
             }
             filereader.close();
