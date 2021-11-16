@@ -67,7 +67,7 @@ public class Chunk {
     }
 
     public boolean isBlock(char c) {
-        return c == 'X' || c == '#' || c == '@' || c == '!' || c == 'B' ||
+        return  c == 'X' || c == '#' || c == '@' || c == '!' || c == 'B' ||
                 c == 'C' || c == 'Q' || c == '<' || c == '>' || c == '[' ||
                 c == ']' || c == '?' || c == 'S' || c == 'U' || c == 'D' || c == '%' || c == 't' || c == 'T';
     }

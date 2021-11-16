@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a90e5993-1815-4951-91c1-d7878da17d7b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/levelGenerators/DaiCaiZhangGenerator/LevelGenerator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/levelGenerators/DaiCaiZhangGenerator/Slice.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GenerateLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GenerateLevel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/levelGenerators/DaiCaiZhangGenerator/Chunk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/levelGenerators/DaiCaiZhangGenerator/Chunk.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/levelGenerators/DaiCaiZhangGenerator/LevelGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/levelGenerators/DaiCaiZhangGenerator/LevelGenerator.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
