@@ -57,10 +57,10 @@ public class Chunk {
     public Chunk getRandNext(Random rnd) {
         int rand = rnd.nextInt(sumNexts);
         int curSum = 0;
-        for (Chunk chk : trackRepeat.keySet()) {
-            curSum += trackRepeat.get(chk);
-            if (rand < sumNexts) {
-                return chk;
+        for(Map.Entry<Chunk, Integer> b : trackRepeat.entrySet()){
+            curSum += b.getValue();
+            if(rand < curSum){
+                return(b.getKey());
             }
         }
         return null;
