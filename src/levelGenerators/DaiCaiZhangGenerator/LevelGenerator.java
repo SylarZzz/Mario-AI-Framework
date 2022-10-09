@@ -1,14 +1,11 @@
 package levelGenerators.DaiCaiZhangGenerator;
 
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 
 import engine.core.MarioLevelGenerator;
-import engine.core.MarioLevelModel;
 import engine.core.MarioTimer;
+import engine.core.MarioLevelModel;
 
 public class LevelGenerator implements MarioLevelGenerator{
     private final String LEVEL_FOLDER = "levels/ge/";
@@ -16,75 +13,75 @@ public class LevelGenerator implements MarioLevelGenerator{
     private List<Integer> startChunks;
     private List<Integer> endChunks;
 
+    // read files from levels folder
     public LevelGenerator(){
         chunks = new ArrayList<Chunk>();
         startChunks = new ArrayList<Integer>();
         endChunks = new ArrayList<Integer>();
-        for (final File fileEntry : new File(LEVEL_FOLDER).listFiles()) {
-            if (!fileEntry.isDirectory()) {
-                readLevel(fileEntry.getAbsolutePath());
+        File[] f =  new File(LEVEL_FOLDER).listFiles();
+        for(int i = 0; i < f.length; i++) {
+            if(!f[i].isDirectory()) {
+                readLevel(f[i].getAbsolutePath());
             }
         }
     }
 
     private void readLevel(String filename){
-        System.out.print("Reading File: " + filename);
         FileReader filereader;
         List<char[]> columns = new ArrayList<char[]>();
         try {
             filereader = new FileReader(filename);
 
-            int i;                        // the character read by filereader
-            int columnnumber = 0;         // the number of column being read
-            int rownumber = 0;            // the number of row being read
+            int c;                        // the character read by filereader
+            int colnum = 0;         // the number of column read
+            int rownum = 0;            // the number of row read
             boolean isFirstLine = true;
 
-            while ((i = filereader.read()) != -1){
-                if ((char) i == '\n'){
+            while ((c = filereader.read()) != -1){
+                if ((char) c == '\n'){
                     if (isFirstLine){
                         isFirstLine = false;
                     }
-                    rownumber++;
-                    columnnumber = 0;
+                    rownum++;
+                    colnum = 0;
                 }
                 else{
                     if (isFirstLine){
                         columns.add(new char[16]);
                     }
-                    columns.get(columnnumber)[rownumber] = (char) i;
-                    columnnumber ++;
+                    columns.get(colnum)[rownum] = (char) c;
+                    colnum++;
                 }
             }
             filereader.close();
 
         } catch (Exception e){
             System.err.println(e.toString());
-            System.err.println("Error with file: " + filename);
             return;
         }
 
         Chunk lastChunk = null;
-        for (char[] c : columns){
+        for (int i = 0; i < columns.size(); i++){
             Chunk tempChunk = null;
-            for (Chunk chunk : chunks){
-                if (chunk.toString().equals(String.valueOf(c))){
-                    tempChunk = chunk;
+            for (int k = 0; k < chunks.size(); k++){
+                if (chunks.get(k).toString().equals(String.valueOf(columns.get(i)))){
+                    tempChunk = chunks.get(k);
                     break;
                 }
             }
             if (tempChunk == null){
                 //new chunk
                 tempChunk = new Chunk();
-                for (int i = 0; i <= 15; ++i){
-                    if ((char) c[i] == 'M'){
+                for (int j = 0; j <= 15; ++j){
+                    if ( columns.get(i)[j] == 'M'){
                         tempChunk.putMario(true);
                         startChunks.add(chunks.size());
                     }
-                    if ((char) c[i] == 'F'){
+                    if ( columns.get(i)[j] == 'F'){
                         tempChunk.putFlag(true);
                         endChunks.add(chunks.size());
                     }
-                    tempChunk.replaceChar(c[i], i);
+                    tempChunk.replaceChar(columns.get(i)[j], j);
                 }
                 chunks.add(tempChunk);
             }
@@ -99,39 +96,40 @@ public class LevelGenerator implements MarioLevelGenerator{
 
     public String getGeneratedLevel(MarioLevelModel mmodel, MarioTimer mtimer){
         // new random number generator
-        Random randomNumberGenerator = new Random();
         mmodel.clearMap();
+        Random rand = new Random();
 
         Chunk currentChunk;
         if (startChunks.size() > 0){
-            currentChunk = chunks.get(startChunks.get(randomNumberGenerator.nextInt(startChunks.size())));
+            currentChunk = chunks.get(startChunks.get(rand.nextInt(startChunks.size())));
         }
-        else{
-            currentChunk = chunks.get(randomNumberGenerator.nextInt(chunks.size()));
+        else {
+            currentChunk = chunks.get(rand.nextInt(chunks.size()));
         }
         for (int i = 0; i <= 15; ++i){
             mmodel.setBlock(0, i, currentChunk.getPixel(i));
         }
 
-        int xCoordinate = 1;
+        int xCoord = 1;
         boolean isFlagExist = false;
-        int preHeight = currentChunk.getHeight();
-        while (xCoordinate < mmodel.getWidth() - 1 ){
+        int lastHeight = currentChunk.getHeight();
+        while (xCoord < mmodel.getWidth() - 1 ){
             do {
-                currentChunk = currentChunk.getRandNext(randomNumberGenerator);
-            } while (currentChunk.getSumNexts() < 1 && currentChunk.getHeight() < preHeight + 4);
+                currentChunk = currentChunk.getRandNext(rand);
+            }
+            while (currentChunk.getSumNexts() < 1 && currentChunk.getHeight() < lastHeight + 4);
             for (int i = 0; i <= 15; ++i){
-                mmodel.setBlock(xCoordinate, i, currentChunk.getPixel(i));
+                mmodel.setBlock(xCoord, i, currentChunk.getPixel(i));
             }
             if (currentChunk.getFlag()){
                 isFlagExist = true;
                 break;
             }
-            xCoordinate++;
+            xCoord++;
         }
 
         if (!isFlagExist){
-            currentChunk = chunks.get(endChunks.get(randomNumberGenerator.nextInt(endChunks.size())));
+            currentChunk = chunks.get(endChunks.get(rand.nextInt(endChunks.size())));
             for (int i = 0; i <= 15; ++i){
                 mmodel.setBlock(mmodel.getWidth() - 1, i, currentChunk.getPixel(i));
             }
@@ -142,6 +140,7 @@ public class LevelGenerator implements MarioLevelGenerator{
 
 
     public String getGeneratorName() {
-        return "DaiCaiZhangMarkovChainGenerator";
+        return "DaiCaiZhangGenerator";
     }
 }
+

@@ -57,17 +57,17 @@ public class Chunk {
     public Chunk getRandNext(Random rnd) {
         int rand = rnd.nextInt(sumNexts);
         int curSum = 0;
-        for (Chunk chk : trackRepeat.keySet()) {
-            curSum += trackRepeat.get(chk);
-            if (rand < sumNexts) {
-                return chk;
+        for(Map.Entry<Chunk, Integer> chk : trackRepeat.entrySet()){
+            curSum += chk.getValue();
+            if(rand < curSum){
+                return(chk.getKey());
             }
         }
         return null;
     }
 
     public boolean isBlock(char c) {
-        return  c == 'X' || c == '#' || c == '@' || c == '!' || c == 'B' ||
+        return c == 'X' || c == '#' || c == '@' || c == '!' || c == 'B' ||
                 c == 'C' || c == 'Q' || c == '<' || c == '>' || c == '[' ||
                 c == ']' || c == '?' || c == 'S' || c == 'U' || c == 'D' || c == '%' || c == 't' || c == 'T';
     }
@@ -85,5 +85,6 @@ public class Chunk {
     public String toString() {
         return String.valueOf(pixels);
     }
+
 
 }
